@@ -1,0 +1,91 @@
+-- LocalScript inside ScreenGui
+
+-- Get references to UI elements
+local frame = script.Parent:WaitForChild("Frame")
+local leftButton = script.Parent:WaitForChild("LeftButton")
+local rightButton = script.Parent:WaitForChild("RightButton")
+
+-- Pages of instructions (each entry = one tutorial page)
+local pages = {
+    [[<b>Welcome to the time management Simulator!</b>
+    In this game, by applying the core elements of time management such as task prioritization, organization, stress management, and other time management elements. 
+    You’ll drive a car and collect gems that represent tasks with different priorities.]],
+
+    [[You only have 1 minute per round.
+
+Gems are worth different amounts:
+
+Small Gem = 10 points (quick and easy to grab).
+
+Large Gem = 50 points (takes longer to reach, but worth more).
+
+Once the timer runs out, gems despawn and you can’t collect anymore.]],
+
+    [[This means you must:
+
+Plan ahead → Decide your route before the timer starts.
+
+Prioritize tasks → Go for the gems that give the most value in the shortest time.
+
+Manage pressure → Work fast, but don’t waste time going the wrong way.]],
+
+    [[How to Play:
+Use W / A / S / D to drive your car.
+
+Click the Start Button when you’re ready — the timer begins after a short countdown.
+
+Collect as many gems as you can before time runs out.
+
+At the end, your score shows how well you managed your time.]],
+
+    [[What you will Learn:
+This game is designed to help you practice time management skills.
+
+You’ll learn that you can’t always do everything — you must choose what’s most important.
+
+You’ll practice making quick decisions under time pressure, just like in real life when deadlines are short.
+
+By replaying, you can improve your strategy and see how planning ahead makes a big difference.]],
+
+    [[Tips:
+- Large gems give more points, but might take longer to reach.
+- Plan your path carefully to collect the most points in the shortest time. 
+- Avoid wasting time on low-value tasks far from your route.]],
+
+    [[Aim of the Game:
+The aim of the game is to collect as many gems as you can and try to beat your personal best record.]],
+
+	[[<b>Good luck!</b>]]
+}
+
+-- Keep track of the current page
+local currentPage = 1
+
+-- Function: Update the tutorial text to match current page
+local function updatePage()
+	frame.TutorialText.Text = pages[currentPage]
+end
+
+-- Right button = next page
+rightButton.MouseButton1Click:Connect(function()
+	if currentPage < #pages then
+		currentPage += 1
+		updatePage()
+	end
+end)
+
+-- Left button = previous page
+leftButton.MouseButton1Click:Connect(function()
+	if currentPage > 1 then
+		currentPage -= 1
+		updatePage()
+	end
+end)
+
+-- Toggle tutorial on/off when clicking TButton
+script.Parent.Parent.TButton.TextButton.MouseButton1Down:Connect(function()
+	script.Parent.Enabled = not script.Parent.Enabled
+end)
+
+-- Initialize tutorial to the first page
+updatePage()
