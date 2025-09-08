@@ -1,0 +1,88 @@
+-- Services and references
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local GemFolder = workspace:WaitForChild("Gems") -- Folder in workspace to hold spawned gems
+local GemTemplate = ReplicatedStorage:WaitForChild("GemModel") -- Template gem to clone
+local GemArea = workspace:WaitForChild("GemArea") -- Part/Area where gems spawn
+
+local GemAmount = 500 -- How many gems to spawn
+
+-- Random Color
+local function RandomGemColor(gem)
+	gem.Color = Color3.fromRGB(math.random(50, 255), math.random(50, 255), math.random(50, 255))
+end
+
+-- Function to place a gem at a random position inside GemArea
+local function RandomPosGem(gem, gemArea)
+	local size = gemArea.Size
+	local pos = gemArea.Position
+
+	-- Random X and Z within the area's boundaries
+	local x = pos.X + math.random(-size.X/2, size.X/2)
+	local z = pos.Z + math.random(-size.Z/2, size.Z/2)
+
+	-- Y is placed above the floor so gems don’t sink
+	local y = pos.Y + size.Y/2 + gem.Size.Y/2
+
+	-- Set the gem’s position
+	gem.Position = Vector3.new(x, y, z)
+end
+
+-- Function to create and spawn gems
+local function AddGems()
+	for i = 1, GemAmount do
+		-- Clone a new gem from the template
+		local newGem = GemTemplate:Clone()
+
+		-- Random chance to decide gem type
+		local roll = math.random(1, 100)
+
+		if roll <= 70 then
+			-- 70% chance → Small gem
+			newGem.Name = "SmallGem"
+			newGem.Size = Vector3.new(5, 5, 5)
+			newGem:SetAttribute("Points", 10)
+
+		elseif roll <= 90 then
+			-- 20% chance → Large gem
+			newGem.Name = "LargeGem"
+			newGem.Size = Vector3.new(9, 9, 9)
+			newGem:SetAttribute("Points", 50)
+
+		else
+			-- 10% chance → Rare gem (can be added later)
+		end
+
+		-- Put the gem in a random spot
+		RandomPosGem(newGem, GemArea)
+		
+		RandomGemColor(newGem)
+
+		-- Parent gem to the Gems folder
+		newGem.Parent = GemFolder
+
+		-- When touched, give points to the player
+		newGem.Touched:Connect(function(touchedPart)
+			if not newGem.CanTouch then return end
+			newGem.CanTouch = false -- Prevents double-triggering
+
+			local player = game.Players:GetPlayerFromCharacter(touchedPart.Parent)
+			game:GetService("ReplicatedStorage").Collect:Play()
+
+			if player and player:FindFirstChild("leaderstats") then
+				local gemsStat = player.leaderstats:FindFirstChild("Gems")
+				if gemsStat then
+					-- Add gem points to player's Gems stat
+					gemsStat.Value += newGem:GetAttribute("Points")
+				end
+				newGem:Destroy() -- Remove gem after collection
+			else
+				-- Re-enable if not a player (so NPCs don’t break it)
+				newGem.CanTouch = true
+			end
+
+		end)
+	end
+end
+
+-- Call function to spawn all gems
+AddGems()
